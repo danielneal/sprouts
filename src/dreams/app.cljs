@@ -19,7 +19,6 @@
             ["react" :as react]
             ["react-native" :as rn]))
 
-
 (def diary-context
   (react/createContext))
 
