@@ -12,6 +12,7 @@
     "@react-navigation/core": "^5.0.0-alpha.25",
     "@react-navigation/native": "^5.0.0-alpha.16",
     "@react-navigation/stack": "^5.0.0-alpha.37",
+    "firebase": "^7.2.0",
     "date-fns": "^2.8.1",
     "expo": "^35.0.0",
     "react": "16.8.3",
