@@ -15,3 +15,12 @@
 13. Farmer Sea -
 14. Tuber - ride sharing app
 15. Betting app for positivity
+
+# Instructions
+
+Sprouts contains all the reusable bite
+Everything else goes in it's own namespace
+
+Choose the app you want to work on by setting it in sprouts.entry-point
+
+Start development with `shadow-cljs watch app` / `expo-cli start`
