@@ -1,9 +1,8 @@
 (ns sprouts.revealer
   (:require [hx.react :refer [defnc]]
             [hx.hooks :as hooks]
-            [clojure-exchange-demo-2019.keyboard :as keyboard]
-            [clojure-exchange-demo-2019.style :refer [s]]
-            [clojure-exchange-demo-2019.dimensions :as dimensions]
+            [sprouts.keyboard :as keyboard]
+            [sprouts.dimensions :as dimensions]
             [cljs-bean.core :refer [->clj]]
             ["react" :as react]
             ["react-native-reanimated" :default Animated :refer
@@ -66,42 +65,3 @@
        children]
       [AnimatedView
        {:style {:height (.-current keyboard-padding)}}]]]))
-
-;; This text input will reveal itself
-(defnc TextInput
-  [props]
-  (let [{:keys [onFocus]} props
-        reveal (react/useContext context)
-        ref (react/useRef)]
-    [rn/TextInput
-     (merge
-       {:underlineColorAndroid "transparent"
-        :autoCorrect false
-        :autoCapitalize "none"
-        :style (s [:br1 :ui1 :bg-ui1 :pa2 :f4 :w100])}
-       props
-       {:ref ref
-        :onFocus (fn [e]
-                   (reveal ref)
-                   (when onFocus
-                     (onFocus e)))})]))
-
-(defnc MultilineTextInput
-  [props]
-  (let [{:keys [onFocus]} props
-        reveal (react/useContext context)
-        ref (react/useRef)]
-    [rn/TextInput
-     (merge
-       {:underlineColorAndroid "transparent"
-        :autoCorrect false
-        :multiline true
-        :numberOfLines 20
-        :autoCapitalize "none"
-        :style (s [:br1 :h10 :ui1 :bg-brand1 :pa2 :f4 :w100])}
-       props
-       {:ref ref
-        :onFocus (fn [e]
-                   (reveal ref)
-                   (when onFocus
-                     (onFocus e)))})]))

@@ -1,4 +1,4 @@
-(ns clojure-exchange-demo-2019.dream-questions)
+(ns dreams.questions)
 
 ;; Eugene Gendlin's dream questions
 ;; For explanations on how to use these, see the book "Let your body interpret your dreams"

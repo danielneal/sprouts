@@ -2,10 +2,10 @@
   (:require [sprouts.async-storage :as async-storage]
             [sprouts.style :as s]
             [sprouts.revealer :as r :refer [Revealer]]
-            [sprouts.buttons :as b]
-            [dreams.ui :as ui [s]]
+            [dreams.ui :as ui :refer [s]]
             [dreams.questions :as q]
             [cljs-bean.core :refer [->clj]]
+            [hx.react :as hx :refer [defnc]]
             ["react-native" :as rn]
             ["react" :as react]
             ["@react-navigation/core" :refer [useNavigation useRoute]]
@@ -108,7 +108,7 @@
      [rn/Text {:style (s [:ui1 :f4 :pb2])}
       "Dream content"]
      [rn/View {:style (s [:pb5])}
-      [r/MultilineTextInput
+      [ui/MultilineTextInput
        {:numberOfLines 10
         :multiline true
         :defaultValue content
@@ -118,7 +118,7 @@
      [rn/Text {:style (s [:ui1 :f4 :pb2])}
       "Dream analysis"]
      [rn/View {:style (s [:pb5])}
-      [r/MultilineTextInput
+      [ui/MultilineTextInput
        {:numberOfLines 10
         :multiline true
         :defaultValue analysis

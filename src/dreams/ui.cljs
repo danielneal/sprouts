@@ -1,7 +1,9 @@
 (ns dreams.ui
   (:require [sprouts.style :as style]
-            ["react-native" :as rn]
+            [sprouts.revealer :as r]
             [hx.react :as hx :refer [defnc]]
+            ["react-native" :as rn]
+            ["react" :as react]
             ["@expo/vector-icons" :refer [Entypo]]))
 
 (def s
@@ -52,3 +54,42 @@
    [Entypo {:name "cross"
             :style (s [:ui1])
             :size 30}]])
+
+;; This text input will reveal itself
+(defnc TextInput
+  [props]
+  (let [{:keys [onFocus]} props
+        reveal (react/useContext r/context)
+        ref (react/useRef)]
+    [rn/TextInput
+     (merge
+       {:underlineColorAndroid "transparent"
+        :autoCorrect false
+        :autoCapitalize "none"
+        :style (s [:br1 :ui1 :bg-ui1 :pa2 :f4 :w100])}
+       props
+       {:ref ref
+        :onFocus (fn [e]
+                   (reveal ref)
+                   (when onFocus
+                     (onFocus e)))})]))
+
+(defnc MultilineTextInput
+  [props]
+  (let [{:keys [onFocus]} props
+        reveal (react/useContext r/context)
+        ref (react/useRef)]
+    [rn/TextInput
+     (merge
+       {:underlineColorAndroid "transparent"
+        :autoCorrect false
+        :multiline true
+        :numberOfLines 20
+        :autoCapitalize "none"
+        :style (s [:br1 :h10 :ui1 :bg-brand1 :pa2 :f4 :w100])}
+       props
+       {:ref ref
+        :onFocus (fn [e]
+                   (reveal ref)
+                   (when onFocus
+                     (onFocus e)))})]))
