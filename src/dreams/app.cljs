@@ -45,29 +45,7 @@
               :pointerEvents "box-none"}
      [rn/View {:style (s [:pa3])}
       [ui/HelpButton {:onPress (fn []
-                                (.navigate navigation "dream-questions"))}]]]))
-
-(defnc TopRightCloseButtonLight
-  []
-  (let [insets (useSafeArea)
-        navigation (useNavigation)]
-    [rn/View {:style (merge
-                       (s [:absolute-fill :aife :jcfs :pa2])
-                       {:paddingTop (.-top insets)})
-              :pointerEvents "box-none"}
-     [ui/CloseButtonLight {:onPress (fn []
-                                     (.goBack navigation))}]]))
-
-(defnc TopRightCloseButtonDark
-  []
-  (let [insets (useSafeArea)
-        navigation (useNavigation)]
-    [rn/View {:style (merge
-                       (s [:absolute-fill :aife :jcfs :pa2])
-                       {:paddingTop (.-top insets)})
-              :pointerEvents "box-none"}
-     [ui/CloseButtonDark {:onPress (fn []
-                                    (.goBack navigation))}]]))
+                                 (.navigate navigation "dream-questions"))}]]]))
 
 (def Stack (createStackNavigator))
 
@@ -77,8 +55,25 @@
     [rn/View {:style (s [:pa4 :aic])}
      [ui/TextButton
       {:onPress (fn []
-                  (.navigate navigation "add-dream"))
+                  (.navigate navigation "dream-form" #js {:action :add-dream
+                                                          :title "Add Dream"}))
        :text "Record Dream"}]]))
+
+(defnc ModalScreen
+  [props]
+  (let [{:keys [style children title]
+         :or {style :modal1}} props
+        insets (useSafeArea)
+        [backgroundColor textColor] (case style
+                                      :modal1 [:bg-ui0 :ui1]
+                                      :modal2 [:bg-brand0 :ui1])]
+    [rn/View {:style (merge {:paddingTop (.-top insets)}
+                            (s [:absolute-fill backgroundColor]))}
+     [rn/Text {:style (s [textColor :f3 :tc :pb3])}
+      title]
+     [:<> children]
+     [ui/TopRightCloseButtonLight]
+     [HelpButtonOverlay]]))
 
 (defnc DreamHeader
   []
@@ -91,78 +86,95 @@
   [d]
   (d/format d "do MMMM yyyy HH':'mm"))
 
+(def incidents
+  [{:id :dream
+    :text "Dream"}
+   {:id :mistake
+    :text "Mistake"}
+   {:id :pang
+    :text "Pang"}])
+
+(def incidents-by-id
+  (into {} (map (juxt :id identity)) incidents))
+
+(defnc IncidentSelector
+  [props]
+  (let [{:keys [onSelect incident]} props]
+    [ui/SelectorButtons
+     {:onSelect onSelect
+      :selected #{incident}
+      :items incidents}]))
+
 (defnc DreamForm
   [props]
-  (let [{:keys [dream onSubmit]} props
+  (let [route (useRoute)
+        navigation (useNavigation)
+        {:keys [params]} (->clj route)
+        {:keys [title dream disable action]} params
+        {:keys [edit-dream diary record-dream]} (react/useContext diary-context)
         [dreamState setDreamState] (react/useState (or dream
                                                        {:recorded-at (js/Date.)
                                                         :content ""
-                                                        :analysis ""}))
-        {:keys [recorded-at content analysis]} dreamState]
-    [r/Revealer {:style (s [:ph2 :pv3])}
-     [rn/Text {:style (s [:ui1 :f4 :pb2])}
-      "Date recorded"]
-     [rn/Text {:style (s [:ui1 :fwb :f5 :pb3])}
-      (format-date recorded-at)]
-     [rn/Text {:style (s [:ui1 :f4 :pb2])}
-      "Dream content"]
-     [rn/View {:style (s [:pb5])}
-      [ui/MultilineTextInput
-       {:numberOfLines 10
-        :multiline true
-        :defaultValue content
-        :onChangeText (fn [text]
-                        (setDreamState (fn [state]
-                                         (assoc state :content text))))}]]
-     [rn/Text {:style (s [:ui1 :f4 :pb2])}
-      "Dream analysis"]
-     [rn/View {:style (s [:pb5])}
-      [ui/MultilineTextInput
-       {:numberOfLines 10
-        :multiline true
-        :defaultValue analysis
-        :onChangeText (fn [text]
-                        (setDreamState (fn [state]
-                                         (assoc state :analysis text))))}]]
-     [rn/View {:style (s [:aic :pb6 :jcc])}
-      [ui/TextButton
-       {:onPress (fn []
-                   (onSubmit dreamState))
-        :text "Save Dream"}]]]))
-
-(defnc AddDream
-  []
-  (let [insets (useSafeArea)
-        {:keys [diary record-dream]} (react/useContext diary-context)
-        navigation (useNavigation)]
-    [rn/View {:style (merge {:paddingTop (.-top insets)}
-                            (s [:absolute-fill :bg-brand0]))}
-     [rn/Text {:style (s [:ui1 :f3 :tc :pb3])}
-      "Add Dream"]
-     [DreamForm {:onSubmit (fn [dream]
-                             (record-dream dream)
-                             (.goBack navigation))}]
-     [TopRightCloseButtonLight]
-     [HelpButtonOverlay]]))
-
-(defnc EditDream
-  []
-  (let [insets (useSafeArea)
-        route (useRoute)
-        {:keys [params]} (->clj route)
-        {:keys [dream]} params
-        {:keys [edit-dream diary record-dream]} (react/useContext diary-context)
-        navigation (useNavigation)]
-    [rn/View {:style (merge {:paddingTop (.-top insets)}
-                            (s [:absolute-fill :bg-brand0]))}
-     [rn/Text {:style (s [:ui1 :f3 :tc :pb3])}
-      "Edit Dream"]
-     [DreamForm {:dream dream
-                 :onSubmit (fn [dream]
-                             (edit-dream dream)
-                             (.goBack navigation))}]
-     [TopRightCloseButtonLight]
-     [HelpButtonOverlay]]))
+                                                        :analysis ""
+                                                        :incident :dream}))
+        {:keys [incident recorded-at content analysis]} dreamState
+        changeContent (react/useCallback
+                        (fn [text]
+                          (setDreamState (fn [state]
+                                           (assoc state :content text)))))
+        changeAnalysis (react/useCallback
+                         (fn [text]
+                           (setDreamState (fn [state]
+                                            (assoc state :analysis text)))))
+        selectIncident (react/useCallback
+                         (fn [incident]
+                           (setDreamState (fn [state]
+                                            (assoc state :incident incident)))))
+        onSubmit (react/useCallback
+                   (fn []
+                     (println dreamState)
+                     (case action
+                       (:analyse-dream :edit-dream) (edit-dream dreamState)
+                       :add-dream (record-dream dreamState))
+                     (.goBack navigation))
+                   #js [action dreamState])
+        ContentField (case action
+                       :analyse-dream [ui/Text1 content]
+                       [ui/MultilineTextInput
+                        {:numberOfLines 10
+                         :multiline true
+                         :defaultValue content
+                         :onChangeText changeContent}])
+        AnalysisField [ui/MultilineTextInput
+                       {:numberOfLines 10
+                        :multiline true
+                        :defaultValue analysis
+                        :onChangeText changeAnalysis}]
+        SubmitButton [ui/TextButton
+                      {:onPress onSubmit
+                       :text "Save Dream"}]]
+    [ModalScreen {:title title
+                  :style :modal2}
+     [r/Revealer {:style (s [:ph2 :pv3])}
+      [rn/Text {:style (s [:ui1 :f4 :pb2])}
+       "Date"]
+      [rn/Text {:style (s [:ui1 :fwb :f5 :pb4])}
+       (format-date recorded-at)]
+      [rn/Text {:style (s [:ui1 :f4 :pb2])}
+       "Incident"]
+      [rn/View {:style (s [:pb4])}
+       [IncidentSelector {:onSelect selectIncident
+                          :incident incident}]]
+      [rn/Text {:style (s [:ui1 :f4 :pb2])}
+       "Content"]
+      [rn/View {:style (s [:pb4])}
+       ContentField]
+      [rn/Text {:style (s [:ui1 :f4 :pb2])}
+       "Analysis"]
+      [rn/View {:style (s [:pb4])}
+       AnalysisField]
+      [rn/View {:style (s [:aic :pb6 :jcc])}
+       SubmitButton]]]))
 
 (defnc EmptyState
   []
@@ -181,16 +193,22 @@
 
 (defnc DreamActions
   [props]
-  (let [{:keys [dream edit-dream remove-dream]} props]
+  (let [{:keys [edit-dream remove-dream analyse-dream]} props]
     [rn/View {:style (s [:fg1 :fdr :bg-ui1 :jcfe :aic])}
      [rn/TouchableOpacity {:style (s [:aic :pa2])
-                           :onPress #(edit-dream dream)}
+                           :onPress analyse-dream}
+      [Ionicons {:name "md-clipboard"
+                 :size 50
+                 :style (s [:ui0])}]
+      [rn/Text "Analyse dream"]]
+     [rn/TouchableOpacity {:style (s [:aic :pa2])
+                           :onPress edit-dream}
       [Ionicons {:name "ios-brush"
                  :size 50
                  :style (s [:ui0])}]
       [rn/Text "Edit dream"]]
      [rn/TouchableOpacity {:style (s [:aic :pa2])
-                           :onPress #(remove-dream dream)}
+                           :onPress remove-dream}
       [Ionicons {:name "ios-trash"
                  :size 50
                  :style (s [:ui0])}]
@@ -198,25 +216,48 @@
 
 (defnc Dream
   [dream]
-  (let [{:keys [recorded-at content analysis]} dream
+  (let [{:keys [recorded-at incident content analysis]} dream
         {:keys [remove-dream]} (react/useContext diary-context)
         navigation (useNavigation)
         swipeable (react/useRef)
-        edit-dream (fn [dream]
-                     (.navigate navigation "edit-dream" {:dream dream})
-                     (.close (.-current swipeable)))]
-    [Swipeable {:renderRightActions (fn [] (hx/f [DreamActions
-                                                  {:remove-dream remove-dream
-                                                   :edit-dream edit-dream
-                                                   :dream dream}]))
+        remove-dream (react/useCallback
+                       (fn []
+                         (remove-dream dream)
+                         (.close (.-current swipeable)))
+                       #js [dream])
+        edit-dream (react/useCallback
+                     (fn []
+                       (.navigate navigation "dream-form" {:dream dream
+                                                           :action :edit-dream
+                                                           :title "Edit Dream"})
+                       (.close (.-current swipeable)))
+                     #js [dream])
+        analyse-dream (react/useCallback
+                        (fn []
+                          (.navigate navigation "dream-form" {:dream dream
+                                                              :action :analyse-dream
+                                                              :title "Analyse Dream"})
+                          (.close (.-current swipeable)))
+                        #js [dream])
+        renderRightActions (react/useCallback
+                             (fn []
+                               (hx/f [DreamActions
+                                      {:analyse-dream analyse-dream
+                                       :remove-dream remove-dream
+                                       :edit-dream edit-dream}]))
+                             #js [remove-dream edit-dream analyse-dream])
+        {:keys [text]} (get incidents-by-id incident)
+        HeadingText [rn/View {:style (s [:pb2])}
+                     [ui/Text2 text]
+                     [ui/Text1 (format-date recorded-at) ]]
+        ContentText [ui/Text1 {:numberOfLines 3}
+                     content]]
+    [Swipeable {:renderRightActions renderRightActions
                 :ref swipeable}
-     [rn/View {:style (s [:bg-brand0 :btw1 :bbw1 :b-ui1 :pa3])}
-      [rn/Text {:style (s [:ui1 :f5 :pb2 :fwb])}
-       (format-date recorded-at)]
-      [rn/Text (merge {:style (s [:ui1 :f5])
-                       :numberOfLines 6})
-       (str content
-            "\n" analysis)]]]))
+     [gh/TouchableOpacity {:style (s [:bg-brand0 :btw1 :bbw1 :b-ui1 :pa3])
+                           :onPress analyse-dream}
+      HeadingText
+      ContentText]]))
 
 (defnc DreamsList
   []
@@ -256,15 +297,11 @@
 (defnc DreamQuestions
   [props]
   (let [insets (useSafeArea)]
-    [rn/View {:style (merge
-                       (s [:bg-ui0 :absolute-fill])
-                       {:paddingTop (.-top insets)})}
-     [rn/Text {:style (s [:ui1 :f3 :tc])}
-      "Dream Questions"]
+    [ModalScreen {:style :modal1
+                  :title "Dream Questions"}
      [rn/ScrollView {:style (s [:fg1 :pa3])}
       (for [question q/dream-questions]
-        [DreamQuestion question])]
-     [TopRightCloseButtonLight]]))
+        [DreamQuestion question])]]))
 
 (defnc App
   []
@@ -279,7 +316,5 @@
                       :component Diary}]
        [Stack.Screen {:name "dream-questions"
                       :component DreamQuestions}]
-       [Stack.Screen {:name "add-dream"
-                      :component AddDream}]
-       [Stack.Screen {:name "edit-dream"
-                      :component EditDream}]]]]))
+       [Stack.Screen {:name "dream-form"
+                      :component DreamForm}]]]]))

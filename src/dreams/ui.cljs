@@ -2,7 +2,10 @@
   (:require [sprouts.style :as style]
             [sprouts.revealer :as r]
             [hx.react :as hx :refer [defnc]]
+            ["react-native-safe-area-context" :refer [useSafeArea]]
+            ["@react-navigation/core" :refer [useNavigation useRoute]]
             ["react-native" :as rn]
+            ["react-native-gesture-handler" :as gh]
             ["react" :as react]
             ["@expo/vector-icons" :refer [Entypo]]))
 
@@ -11,10 +14,7 @@
     {:palette {:ui0 "#333344"
                :ui1 "#DDDDCC"
                :brand0 "#222244"
-               :brand1 "#202033"
-               :status0 "#5b9851"
-               :status1 "#f5a623"
-               :status2 "#b5071c"}
+               :brand1 "#202033"}
      :rem 15}))
 
 (defnc HelpButton
@@ -22,6 +22,18 @@
   [rn/TouchableOpacity
    (merge props {:style (merge (s [:sh1 :h3 :w3 :br50 :bg-ui1 :aic :jcc]))})
    [rn/Text {:style (s [:f3])} "?"]])
+
+(defnc Text1
+  [props]
+  (let [{:keys [children]} props]
+    [rn/Text (merge props {:style (s [:ui1 :f5])})
+     children]))
+
+(defnc Text2
+  [props]
+  (let [{:keys [children]} props]
+    [rn/Text (merge props {:style (s [:ui1 :f5 :fwb])})
+     children]))
 
 (defnc TextButton
   [props]
@@ -93,3 +105,43 @@
                    (reveal ref)
                    (when onFocus
                      (onFocus e)))})]))
+
+(defnc SelectorButtons
+  [props]
+  (let [{:keys [selected items onSelect]} props]
+    [rn/View {:style (s [:fdr])}
+     (for [item items
+           :let [{:keys [id text]} item
+                 selected? (contains? selected id)
+                 style (if selected?
+                         {:text (s [:ui0])
+                          :button (s [:sh1 :pv2 :ph3 :br2 :aic :jcc :bg-ui1])}
+                         {:text (s [:ui1])
+                          :button (s [:sh1 :pv2 :ph3 :br2 :aic :jcc :bg-brand1])})]]
+       [gh/TouchableOpacity {:key id
+                             :style (:button style)
+                             :onPress #(onSelect id)}
+        [rn/Text {:style (:text style)}
+         text]])]))
+
+(defnc TopRightCloseButtonLight
+  []
+  (let [insets (useSafeArea)
+        navigation (useNavigation)]
+    [rn/View {:style (merge
+                       (s [:absolute-fill :aife :jcfs :pa2])
+                       {:paddingTop (.-top insets)})
+              :pointerEvents "box-none"}
+     [CloseButtonLight {:onPress (fn []
+                                   (.goBack navigation))}]]))
+
+(defnc TopRightCloseButtonDark
+  []
+  (let [insets (useSafeArea)
+        navigation (useNavigation)]
+    [rn/View {:style (merge
+                       (s [:absolute-fill :aife :jcfs :pa2])
+                       {:paddingTop (.-top insets)})
+              :pointerEvents "box-none"}
+     [CloseButtonDark {:onPress (fn []
+                                  (.goBack navigation))}]]))
