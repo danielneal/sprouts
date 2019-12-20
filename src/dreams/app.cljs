@@ -193,26 +193,29 @@
 
 (defnc DreamActions
   [props]
-  (let [{:keys [edit-dream remove-dream analyse-dream]} props]
+  (let [{:keys [edit-dream remove-dream analyse-dream]} props
+        AnalyseButton [rn/TouchableOpacity {:style (s [:aic :pa2])
+                                            :onPress analyse-dream}
+                       [Ionicons {:name "md-clipboard"
+                                  :size 50
+                                  :style (s [:ui0])}]
+                       [rn/Text "Analyse dream"]]
+        EditButton [rn/TouchableOpacity {:style (s [:aic :pa2])
+                                         :onPress edit-dream}
+                    [Ionicons {:name "ios-brush"
+                               :size 50
+                               :style (s [:ui0])}]
+                    [rn/Text "Edit dream"]]
+        DeleteButton [rn/TouchableOpacity {:style (s [:aic :pa2])
+                                           :onPress remove-dream}
+                      [Ionicons {:name "ios-trash"
+                                 :size 50
+                                 :style (s [:ui0])}]
+                      [rn/Text "Delete dream"]]]
     [rn/View {:style (s [:fg1 :fdr :bg-ui1 :jcfe :aic])}
-     [rn/TouchableOpacity {:style (s [:aic :pa2])
-                           :onPress analyse-dream}
-      [Ionicons {:name "md-clipboard"
-                 :size 50
-                 :style (s [:ui0])}]
-      [rn/Text "Analyse dream"]]
-     [rn/TouchableOpacity {:style (s [:aic :pa2])
-                           :onPress edit-dream}
-      [Ionicons {:name "ios-brush"
-                 :size 50
-                 :style (s [:ui0])}]
-      [rn/Text "Edit dream"]]
-     [rn/TouchableOpacity {:style (s [:aic :pa2])
-                           :onPress remove-dream}
-      [Ionicons {:name "ios-trash"
-                 :size 50
-                 :style (s [:ui0])}]
-      [rn/Text "Delete dream"]]]))
+     AnalyseButton
+     EditButton
+     DeleteButton]))
 
 (defnc Dream
   [dream]
