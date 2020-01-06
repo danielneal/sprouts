@@ -1,5 +1,6 @@
 {:source-paths ["src"]
  :dependencies [[lilactown/hx "0.5.3"]
+                [lilactown/helix "0.0.1-SNAPSHOT"]
                 [cljs-bean "1.5.0"]]
  :builds
  {:app

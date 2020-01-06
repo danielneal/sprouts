@@ -16,6 +16,8 @@
 14. Tuber - ride sharing app
 15. Betting app for positivity
 16. Allchestra - play music across devices
+17. Half life - repeatable items that decay over time for e.g. cleaning, items in fridges
+18. Talkback - random comebacks
 
 # Instructions
 
