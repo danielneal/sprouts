@@ -2,6 +2,7 @@
   "Style system based on tachyons"
   (:require ["react-native-appearance" :refer [useColorScheme]]
             ["react" :as react]
+            [helix.hooks :as hooks]
             [cljs-bean.core :refer [->js]]))
 
 (defn flex
@@ -293,15 +294,18 @@
   "palette - map => palette to use
 
    palettes - map of theme => palette
-   default-palette => key into the palettes map specifying the default palette."
+   default-palette => key into the palettes map specifying the default palette.
+
+   Returns either a style function (if a single palette), or a style hook (useStyle) which is a hook that will return a style callback that will swtich with the color scheme.
+   "
   (let [{:keys [default-palette palette palettes]
          :or {default-palette "light"}} opts]
     (cond
       palette
       (let [m (tachyons opts)]
-        (fn [args]
+        (fn style [args]
           (->js (reduce (fn [acc k]
-                          (merge acc (get m k)))
+                          (merge acc (or (get m k) (when (map? k) k))))
                   {}
                   args))))
       palettes
@@ -313,12 +317,12 @@
                 palettes)
             s (fn [theme args]
                 (->js (reduce (fn [acc k]
-                                (merge acc (get-in m [theme k])))
+                                (merge acc (or (get-in m [theme k]) (when (map? k) k))))
                         {}
                         args)))]
-        (fn []
+        (fn useStyle []
           (let [theme (useColorScheme)]
-
-            (react/useCallback (fn [args]
-                                 (s theme args))
-              #js [theme])))))))
+            (hooks/use-callback
+              [theme]
+              (fn [args]
+                (s theme args)))))))))

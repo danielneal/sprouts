@@ -4,7 +4,7 @@
    [dreams.app :as dreams]
    [buoyancy.app :as buoyancy]
    [helix.core :refer [defnc $ $$ <>]]
-   [sprouts.ui :as ui]
+   [sprouts.native :as n]
    [sprouts.style2 :as style2]
    [cljs-bean.core :refer [->clj ->js]]
    [hx.react :as hx]
@@ -30,8 +30,8 @@
   [props]
   (let [s (useStyle)
         {:keys [text]} props]
-    (ui/View {:style (s [:bg-brand1 :h8 :min-w8 :max-w12 :jcc :aic])}
-      (ui/Text {:style (s [:ui0])}
+    (n/View {:style (s [:bg-brand1 :h8 :min-w8 :max-w12 :jcc :aic])}
+      (n/Text {:style (s [:ui0])}
         text))))
 
 (defnc Grid
@@ -44,21 +44,21 @@
         columns (math/safeCeil (/ (:width layout) max-width))
         width (int (/ (:width layout) columns))]
     (println "rerendering" layout columns width)
-    (ui/View {:style (s [:fww :fg1 :fdr])
+    (n/View {:style (s [:fww :fg1 :fdr])
               :onLayout (fn [^js e]
                           (setLayout (->clj (.-layout (.-nativeEvent e)))))}
       (for [item items
             :let [{:keys [id]} item]]
         ^{:key id}
-        (ui/View {:style #js {:width width
+        (n/View {:style #js {:width width
                               :height width
                               :backgroundColor "#FFFFFF"}}
-          (ui/Text (pr-str item)))))))
+          (n/Text (pr-str item)))))))
 
 (defnc App
   []
   (let [s (useStyle)]
-    (ui/View {:style #js {:backgroundColor "#EEAABB"
+    (n/View {:style #js {:backgroundColor "#EEAABB"
                           :width "100%"
                           :height "100%"
                           :top 0
@@ -66,11 +66,11 @@
                           :bottom 0
                           :right 0
                           :position "absolute"}}
-      (ui/Text {:style (s [:pt3])}
+      (n/Text {:style (s [:pt3])}
         "oi oi oi")
-      (ui/Text {:style (s [:pt3])}
+      (n/Text {:style (s [:pt3])}
         "bobobo")
-      (ui/Text {:style (s [:bg-ui0])}
+      (n/Text {:style (s [:bg-ui0])}
         "Some text")
       ($ Grid {:items
                [{:id 1
@@ -83,16 +83,16 @@
                  :text "basdfas"}
                 {:id 5
                  :text "Asdf"}]})
-      (ui/TouchableOpacity {:style #js {:backgroundColor "#FFAAFF"}}
-        (ui/ActivityIndicator {:size  "large"
+      (n/TouchableOpacity {:style #js {:backgroundColor "#FFAAFF"}}
+        (n/ActivityIndicator {:size  "large"
                                :color "red"})))))
 
 (defn start
   "Entry point for ui, called every hot reload"
   {:dev/after-load true}
   []
-  (shadow-expo/render-root ;;($ App)
-    (hx/f [dreams/App])))
+  (shadow-expo/render-root
+    ($ dreams/App)))
 
 (defn init
   "Initialization function, called once at app start up"

@@ -1,6 +1,7 @@
 (ns sprouts.revealer
-  (:require [hx.react :refer [defnc]]
-            [hx.hooks :as hooks]
+  (:require [helix.hooks :as hooks]
+            [helix.core :as helix :refer [$ defnc]]
+            [sprouts.native :as n]
             [sprouts.keyboard :as keyboard]
             [sprouts.dimensions :as dimensions]
             [cljs-bean.core :refer [->clj]]
@@ -30,7 +31,8 @@
         inner (react/useRef)
         outer (react/useRef)
         [visible _] (keyboard/useKeyboard)
-        reveal (react/useCallback
+        reveal (hooks/use-callback
+                 :once
                  (fn [^js ref]
                    (js/setTimeout
                      (fn []
@@ -43,25 +45,24 @@
                                                                           :animated true})))))
                      200)))
         keyboard-padding (react/useRef (AnimatedValue. 0))]
-    (hooks/useEffect
+    (hooks/use-effect
+      [visible]
       (fn []
         (let [anim (animated-timing
                      (.-current keyboard-padding)
                      #js {:toValue (if visible keyboard/keyboard-height 0)
                           :duration 200
                           :easing (Easing.inOut Easing.ease)})]
-          (.start anim)))
-      [visible])
-    [:provider {:context context
-                :value reveal}
-     [AnimatedScrollView
-      (merge
-        (dissoc props :children :reveal-offset)
+          (.start anim))))
+    (helix/provider {:context context
+                     :value reveal}
+      ($ AnimatedScrollView
         {:ref outer
          :keyboardShouldPersistTaps "handled"
          :showsVerticalScrollIndicator false
-         :scrollEventThrottle 1})
-      [rn/View {:ref inner}
-       children]
-      [AnimatedView
-       {:style {:height (.-current keyboard-padding)}}]]]))
+         :scrollEventThrottle 1
+         & (dissoc props :children :reveal-offset)}
+        (n/View {:ref inner}
+          children)
+        ($ AnimatedView
+          {:style #js {:height (.-current keyboard-padding)}})))))

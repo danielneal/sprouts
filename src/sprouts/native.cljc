@@ -1,7 +1,7 @@
-(ns sprouts.ui
+(ns sprouts.native
   (:require [helix.core :as hx]
             #?(:cljs ["react-native" :as rn]))
-  #?(:cljs (:require-macros [sprouts.ui])))
+  #?(:cljs (:require-macros [sprouts.native])))
 
 (def tags
   '[ActivityIndicator
@@ -43,7 +43,8 @@
    (defn gen-tag
      [t]
      `(defmacro ~t [& args#]
-        `(hx/$ ~(symbol "rn" ~(str t)) ~@args#))))
+        `(hx/$ ~(symbol "rn" ~(str t))
+           ~@args#))))
 
 #?(:clj
    (defmacro gen-tags
