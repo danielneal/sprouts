@@ -1,5 +1,5 @@
 (ns dreams.ui
-  (:require [sprouts.style2 :as style]
+  (:require [sprouts.style4 :as style4 :refer [s]]
             [sprouts.revealer :as r]
             [sprouts.native :as n]
             [helix.core :as hx :refer [$ defnc]]
@@ -11,13 +11,13 @@
             ["react" :as react]
             ["@expo/vector-icons" :refer [Entypo]]))
 
-(def s
-  (style/init
-    {:palette {:ui0 "#333344"
-               :ui1 "#DDDDCC"
-               :brand0 "#222244"
-               :brand1 "#202033"}
-     :rem 15}))
+(style4/init!
+  {:themes {"dark" {:palette {:ui0 "#333344"
+                              :ui1 "#DDDDCC"
+                              :brand0 "#222244"
+                              :brand1 "#202033"}
+                    :rem 15}}
+   :default-theme "dark"})
 
 (defnc HelpButton
   [props]

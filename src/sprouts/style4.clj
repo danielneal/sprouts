@@ -1,7 +1,6 @@
-(ns sprouts.style3
+(ns sprouts.style4
   "Style system based on tachyons"
-  #?(:clj (:require [clojure.walk :as walk]))
-  #?(:cljs (:require-macros [sprouts.style3])))
+  (:require [clojure.walk :as walk]))
 
 (defn flex
   "Flex properties"
@@ -30,7 +29,7 @@
   "Margin and padding properties
    ma0 ... ma10            margin: 0|0.25|0.5|1|2|3|4|5|6|7|8 rem
    ml|mr|mb|mt [0-10]      marginLeft, marginRight, marginBottom, marginTop
-   mh [0-10]               marginHorizontal
+  d   mh [0-10]               marginHorizontal
    mv [0-10]               marginVertical"
   [opts]
   (let [{:keys [rem]} opts
@@ -287,64 +286,31 @@
     (shadow opts)
     (line-heights opts)))
 
+(def registry (atom nil))
 
-#?(:clj
-   (def registry (atom nil))
+(defmacro init!
+  "Initializes tachyons with the provided themes"
+  [opts]
+  (let [{:keys [default-theme themes]} opts]
+    (reset! registry
+      (into {"no-preference" (tachyons (get themes (or default-theme "light")))}
+        (for [[k v] themes]
+          [k (tachyons v)])))
+    ;; *registry* is a dynamic var in style4.cljs
+    `(set! *registry* ~(deref registry))))
 
-   :cljs
-   (def ^:dynamic *registry* nil))
-
-#?(:cljs
-   (def ^:dynamic *current-theme* "no-preference"))
-
-#?(:cljs
-   (defn set-current-theme!
-     "Sets the current style theme"
-     [theme]
-     (set! *current-theme* theme)))
-
-#?(:cljs
-   (def ^:dynamic *debug* nil))
-
-#?(:clj
-   (defmacro init!
-     "Initializes tachyons with the provided themes"
-     [opts]
-     (let [{:keys [default-theme themes]} opts]
-       (reset! registry
-         (into {"no-preference" (tachyons (get themes (or default-theme "light")))}
-           (for [[k v] themes]
-             [k (tachyons v)])))
-       `(do
-          (println "Init with theme" ~default-theme)
-          (println "macroexpanding:" ~(str "heyall " (walk/macroexpand-all '(s [:bg-ui1 :w100 :h100]))))
-          (set! *registry* ~(deref registry))))))
-
-#?(:cljs
-   (defn s*
-     "Function for dynamic styles"
-     [args]
-     (println "dynamic")
-     (reduce (fn [acc k]
-               (merge acc (get-in *registry* [*current-theme* k])))
-       {}
-       args)))
-
-#?(:clj
-   (defmacro s
-     "Macro to statically convert styles to js object"
-     [args#]
-     (assert (some? @registry) "Must call init! to set themes themes before using `s` macro")
-     (if (every? keyword? args#)
-       `(do
-          (println "static")
-          (case *current-theme*
-            ~@(mapcat (fn [[k# m#]]
-                        `[~k# (cljs.core/js-obj
-                                ~@(mapcat identity
-                                    (reduce (fn [acc# k#]
-                                              (merge acc# (get m# k#)))
-                                      {}
-                                      args#)))])
-                @registry)))
-       `(s* ~args#))))
+(defmacro s
+  "Macro to statically convert styles to js object"
+  [args#]
+  (assert (some? @registry) "Must call init! to set themes themes before using `s` macro")
+  (if (every? keyword? args#)
+    `(case *current-theme*
+       ~@(mapcat (fn [[k# m#]]
+                   `[~k# (cljs.core/js-obj
+                           ~@(mapcat identity
+                               (reduce (fn [acc# k#]
+                                         (merge acc# (get m# k#)))
+                                 {}
+                                 args#)))])
+           @registry))
+    `(s* ~args#)))

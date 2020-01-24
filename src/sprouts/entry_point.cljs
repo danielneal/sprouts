@@ -5,8 +5,7 @@
    [buoyancy.app :as buoyancy]
    [helix.core :refer [defnc $ $$ <>]]
    [sprouts.native :as n]
-   [sprouts.style2 :as style2]
-   [sprouts.style3 :as style3 :refer [s]]
+   [sprouts.style4 :as style4 :refer [s]]
    [cljs-bean.core :refer [->clj ->js]]
    [hx.react :as hx]
    [dreams.app :as dreams]
@@ -16,18 +15,19 @@
    ["expo" :as expo :refer [SplashScreen]]
    [goog.math :as math]))
 
-(style3/init!
-  {:themes
-   {"dark" {:palette {:ui0 "#EFAAEF"
-                      :ui1 "#FFFFFF"
-                      :brand1 "#FFAA00"}
-            :rem 15
-            :font-rem 15}
-    "light" {:palette {:ui0 "#DDDD00"
-                       :ui1 "#000000"
-                       :brand1 "#FFAA00"}
-             :rem 15
-             :font-rem 15}}})
+#_(style4/init!
+    {:themes
+     {"dark" {:palette {:ui0 "#EFAAEF"
+                        :ui1 "#FFFFFF"
+                        :brand1 "#FFAA00"}
+              :rem 15
+              :font-rem 15}
+      "light" {:palette {:ui0 "#DDDD00"
+                         :ui1 "#000000"
+                         :brand1 "#FFAA00"}
+               :rem 15
+               :font-rem 15}}
+     :default-theme "light"})
 
 #_(defnc Tile
     [props]
@@ -92,9 +92,7 @@
 
 (defnc App3
   []
-  (let [st (style3/s [:bg-brand1 :w100 :h50 :absolute])]
-    (println (type st))
-    (prn st)
+  (let [st (s [:bg-brand1 :w100 :h100 :absolute])]
     (n/View
       {:style st})))
 
@@ -103,7 +101,7 @@
   {:dev/after-load true}
   []
   (shadow-expo/render-root
-    ($ App3)))
+    ($ dreams/App)))
 
 (defn init
   "Initialization function, called once at app start up"

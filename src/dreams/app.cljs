@@ -2,7 +2,8 @@
   (:require [sprouts.async-storage :as async-storage]
             [sprouts.native :as n]
             [sprouts.revealer :as r :refer [Revealer]]
-            [dreams.ui :as ui :refer [s]]
+            [dreams.ui :as ui]
+            [sprouts.style4 :refer [s]]
             [dreams.questions :as q]
             [cljs-bean.core :refer [->clj]]
             [helix.core :as helix :refer [$$ $ <> defnc]]
@@ -68,8 +69,7 @@
         [backgroundColor textColor] (case style
                                       :modal1 [:bg-ui0 :ui1]
                                       :modal2 [:bg-brand0 :ui1])]
-    (n/View {:style (s [:absolute-fill backgroundColor]
-                      {:paddingTop (.-top insets)})}
+    (n/View {:style (s [:absolute-fill backgroundColor {:paddingTop (.-top insets)}])}
       (n/Text {:style (s [textColor :f3 :tc :pb3])}
         title)
       (<> children)
@@ -90,10 +90,12 @@
 (def incidents
   [{:id :dream
     :text "Dream"}
-   {:id :mistake
-    :text "Mistake"}
-   {:id :pang
-    :text "Pang"}])
+   {:id :slip
+    :text "Slip"}
+   {:id :pain
+    :text "Pain"}
+   {:id :coincidence
+    :text "Coincidence"}])
 
 (def incidents-by-id
   (into {} (map (juxt :id identity)) incidents))
