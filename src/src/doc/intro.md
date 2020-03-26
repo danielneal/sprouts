@@ -1,0 +1,3 @@
+u# Introduction to tailor
+
+TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)

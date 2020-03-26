@@ -13,3 +13,4 @@ target
 .shadow-cljs
 # macOS
 .DS_Store
+public

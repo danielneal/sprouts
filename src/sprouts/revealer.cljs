@@ -30,7 +30,7 @@
          :or {reveal-offset 50}} props
         inner (react/useRef)
         outer (react/useRef)
-        [visible _] (keyboard/useKeyboard)
+        [keyboard-visible? _] (keyboard/useKeyboard)
         reveal (hooks/use-callback
                  :once
                  (fn [^js ref]
@@ -44,16 +44,8 @@
                              (.scrollTo (.getNode (.-current outer)) #js {:y (max (- y reveal-offset) 0)
                                                                           :animated true})))))
                      200)))
-        keyboard-padding (react/useRef (AnimatedValue. 0))]
-    (hooks/use-effect
-      [visible]
-      (fn []
-        (let [anim (animated-timing
-                     (.-current keyboard-padding)
-                     #js {:toValue (if visible keyboard/keyboard-height 0)
-                          :duration 200
-                          :easing (Easing.inOut Easing.ease)})]
-          (.start anim))))
+        [keyboardPadding setKeyboardPadding] (hooks/use-state 0)]
+    ;;  a context that provides the "reveal" callback which will take a ref and reveal it
     (helix/provider {:context context
                      :value reveal}
       ($ AnimatedScrollView
@@ -61,8 +53,9 @@
          :keyboardShouldPersistTaps "handled"
          :showsVerticalScrollIndicator false
          :scrollEventThrottle 1
+         :style #js {:backgroundColor "pink"}
          & (dissoc props :children :reveal-offset)}
         (n/View {:ref inner}
           children)
-        ($ AnimatedView
-          {:style #js {:height (.-current keyboard-padding)}})))))
+        (when keyboard-visible?
+          (n/View {:style #js {:height keyboard/*keyboard-height*}}))))))

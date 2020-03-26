@@ -1,12 +1,9 @@
-(ns sprouts.style4
+(ns sprouts.style5
   "Style system based on tachyons"
-  (:require [shadow.resource :as rc]))
+  (:require [cljs-bean.core :refer [->js]]))
 
-(println "requiring style4")
-
-(defn flex
-  "Flex properties"
-  [opts]
+(def flex
+  "Static flex properties"
   {:fg1 {"flexGrow" 1}
    :fs0 {"flexShrink" 0}
    :fdr {"flexDirection" "row"}
@@ -27,13 +24,12 @@
    :ass {"alignSelf" "stretch"}
    :oh {"overflow" "hidden"}})
 
-(defn spacing
-  "Margin and padding properties
+(defn spacing [opts]
+  "Dynamic margin and padding properties (dependent on rem)
    ma0 ... ma10            margin: 0|0.25|0.5|1|2|3|4|5|6|7|8 rem
    ml|mr|mb|mt [0-10]      marginLeft, marginRight, marginBottom, marginTop
    mh [0-10]               marginHorizontal
    mv [0-10]               marginVertical"
-  [opts]
   (let [{:keys [rem]} opts
         scale [["0" 0]
                ["1" 0.25]
@@ -67,7 +63,7 @@
         [(keyword (str pre s)) {prop (int (* fac rem))}]))))
 
 (defn dims
-  "Heights and widths
+  "Dynamic heights and widths, depends on rem
    h0 ... h16 0-16rem"
   [opts]
   (let [{:keys [rem]} opts
@@ -102,8 +98,19 @@
             [s x] scale]
         [(keyword (str pre s)) {prop (if (string? x) x (int (* x rem)))}]))))
 
+(defn colors
+  "Dynamic color properties"
+  [opts]
+  (let [{:keys [palette]} opts]
+    (into {}
+      (for [[c hex] palette
+            [pre prop] [[nil "color"]
+                        ["b-" "borderColor"]
+                        ["bg-" "backgroundColor"]]]
+        [(keyword (str pre (name c))) {prop hex}]))))
+
 (defn absolute
-  "Absolute positioning and offsets
+  "Absolute positioning and offsets, depends on rem
    absolute                     position: absolute
    top|right|bottom|left-0      top|right|bottom|left: 0 rem
                      ... 1                         ... 1 rem
@@ -126,11 +133,10 @@
             [s fac] scale]
         [(keyword (str pre s)) {s (int (* fac rem))}]))))
 
-(defn border-width
-  "Border width properties
+(def border-width
+  "Static border width properties
    ba                     borderWidth: 1
    bl|br|bt|bb            borderLeftWidth: 1 | borderRightWidth: 1 ..."
-  [opts]
   (let [scale [["0" 0]
                ["1" 1]
                ["2" 2 ]]]
@@ -144,7 +150,7 @@
         [(keyword (str pre s)) {prop width}]))))
 
 (defn border-radius
-  "Border radius properties
+  "Dynamic border radius properties
    br0 ... br5            borderRadius: 0|0.125|0.25|0.5|1]2 rem
    br50                   borderRadius: 50%"
   [opts]
@@ -175,133 +181,56 @@
       (for [[s fac] scale]
         [(keyword (str "f" s)) {"fontSize" (int (* fac (or font-rem rem)))}]))))
 
-(defn font-weight
-  "Font weight properties
-   fw"
-  [opts]
-  {:fwb {"fontWeight" "bold"}})
-
-(defn text-align
-  "Text align properties
-   tl|tc|tr|tj            textAlign: left|center|right|justify"
-  [opts]
-  {:tl {"textAlign" "left"}
-   :tc {"textAlign" "center"}
-   :tr {"textAlign" "right"}
-   :tj {"textAlign" "justify"}})
-
-(defn text-decoration
-  "Text decoration line properties"
-  [opts]
-  {:tdu {"textDecorationLine" "underline"
-         "textDecorationStyle" "solid"}
-   :tdl {"textDecorationLine" "line-through"
-         "textDecorationStyle" "solid"}})
-
-(defn opacity
-  "Opacity properties
-   o10|20|...|100        opacity: 0.1|0.2|...|1
-   o05                   opacity: 0.05
-   o025                  opacity: 0.025"
-  [opts]
-  (let [scale [["0" 0]
-               ["025" 0.025]
-               ["05" 0.05]
-               ["10" 0.1]
-               ["20" 0.2]
-               ["30" 0.3]
-               ["40" 0.4]
-               ["50" 0.5]
-               ["60" 0.6]
-               ["70" 0.7]
-               ["80" 0.8]
-               ["90" 0.9]
-               ["100" 1]]]
-    (into {}
-      (for [[s o] scale]
-        [(keyword (str "o" s)) {"opacity" o}]))))
-
-(defn colors
-  "Font family & weight properties"
-  [opts]
-  (let [{:keys [palette]} opts]
-    (into {}
-      (for [[c hex] palette
-            [pre prop] [[nil "color"]
-                        ["b-" "borderColor"]
-                        ["bg-" "backgroundColor"]]]
-        [(keyword (str pre (name c))) {prop hex}]))))
-
-(defn shadow
-  "Shadow properties"
-  [opts]
-  (let [shadow-color "#2a2a2a"
-        text-shadow-color "rgba(0,0,0,0.7)"]
-    {:tsh {"textShadowRadius" 5
-           "textShadowOffset" {"width" 1 "height" 1}
-           "textShadowColor" text-shadow-color}
-     :sh1 {"shadowRadius" 2
-           "shadowOffset" {"height" 2
-                           "width" 0}
-           "shadowColor" shadow-color
-           "shadowOpacity" 0.25}
-     :sh2 {"shadowRadius" 3
-           "shadowOffset" {"height" 2
-                           "width" 0}
-           "shadowColor" shadow-color
-           "shadowOpacity" 0.5}
-     :sh1-android {"elevation" 2}
-     :sh2-android {"elevation" 4}}))
-
-(defn line-heights
-  [opts]
-  {:lh0 {"lineHeight" 1}
-   :lh1 {"lineHeight" 1.25}
-   :lh2 {"lineHeight" 1.5}
-   :lh3 {"lineHeight" 1.75}})
-
-(defn scale-line-height
-  "Postprocess step to scale lineheight according to
-   provided font size."
-  [m]
-  (let [{:keys [fontSize lineHeight]} m]
-    (cond
-      (and lineHeight fontSize) (assoc m :lineHeight (int (* fontSize lineHeight)))
-      (and lineHeight (not fontSize)) (do (println "Font size must be provided if lineheight is required") m)
-      :else m)))
-
-(defn tachyons
-  [opts]
+(def static-tachyons
   (merge
-    (flex opts)
-    (spacing opts)
-    (dims opts)
-    (absolute opts)
-    (border-width opts)
-    (border-radius opts)
-    (font-size opts)
-    (font-weight opts)
-    (text-align opts)
-    (text-decoration opts)
-    (opacity opts)
-    (colors opts)
-    (shadow opts)
-    (line-heights opts)))
+    flex
+    border-width))
 
-(println
-  (macroexpand-1 '(rc/inline "dreams/style.edn")))
+(declare *opts*)
 
-(defmacro s
-  "Macro to convert static styles to js object"
-  [args#]
-  (if (every? keyword? args#)
-    `(case *current-theme*
-       ~@(mapcat (fn [[k# m#]]
-                   `[~k# (cljs.core/js-obj
-                           ~@(mapcat identity
-                               (reduce (fn [acc# k#]
-                                         (merge acc# (get m# k#)))
-                                 {}
-                                 args#)))])
-           (rc/inline "dreams/style.edn")))
-    `(s* ~args#)))
+(def tachyons
+  (memoize
+    (fn [opts]
+      (merge
+        static-tachyons
+        (absolute opts)
+        (colors opts)
+        (spacing opts)
+        (dims opts)
+        (border-radius opts)
+        (font-size opts)))))
+
+#?(:cljs
+   (defn s*
+     "Function to convert dynamic styles to js object"
+     [args]
+     (let [m (tachyons *opts*)]
+       (->js (reduce (fn [acc k]
+                   (println acc k)
+                   (merge acc (or (get m k) (when (map? k) k))))
+           {}
+           args)))))
+
+#?(:clj
+   (defmacro s
+     "Macro to convert styles to js object.
+      Dynamic styles (that depend on options like palette)
+      are computed at runtime, static styles that don't
+      depend on anything are computed statically at compile  time"
+     [args#]
+     (let [{static# true
+            dynamic# false} (group-by #(contains? static-tachyons %) args#)]
+       `(do
+          (cljs.core/array
+            (cljs.core/js-obj
+              ~@(mapcat identity
+                  (reduce (fn [acc# k#]
+                            (println k#)
+                            (merge acc# (get static-tachyons k#)))
+                    {}
+                    static#)))
+            (s* ~dynamic#))
+          (println)))))
+
+(defn init! [opts]
+  (set! *opts* opts))

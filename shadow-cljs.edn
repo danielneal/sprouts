@@ -1,7 +1,4 @@
-{:source-paths ["src"]
- :dependencies [[lilactown/hx "0.5.3"]
-                [lilactown/helix "0.0.5"]
-                [cljs-bean "1.5.0"]]
+{:deps true
  :builds
  {:app
   {:target :react-native
@@ -9,4 +6,11 @@
    :output-dir "target"
    :compiler-options {:infer-externs :auto}
    :devtools {:autoload true
-              :preloads [shadow.remote.runtime.cljs.browser]}}}}
+              :preloads [shadow.remote.runtime.cljs.browser]}}
+
+  :tailor
+  {:target :browser
+   :modules {:main {:init-fn tailor.ui.core/init}}
+   :devtools
+   {:http-root "src/tailor/public"
+    :http-port 8080}}}}

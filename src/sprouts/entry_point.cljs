@@ -2,32 +2,16 @@
   (:require
    [shadow.expo :as shadow-expo]
    [dreams.app :as dreams]
-   [buoyancy.app :as buoyancy]
+   #_[buoyancy.app :as buoyancy]
    [helix.core :refer [defnc $ $$ <>]]
    [sprouts.native :as n]
-   [sprouts.style4 :as style4 :refer [s]]
+   [sprouts.style6 :as style6 :refer [s]]
    [cljs-bean.core :refer [->clj ->js]]
    [hx.react :as hx]
-   [dreams.app :as dreams]
-   [buoyancy.app :as buoyancy]
    ["react" :as react]
    ["react-native" :as rn]
    ["expo" :as expo :refer [SplashScreen]]
    [goog.math :as math]))
-
-#_(style4/init!
-    {:themes
-     {"dark" {:palette {:ui0 "#EFAAEF"
-                        :ui1 "#FFFFFF"
-                        :brand1 "#FFAA00"}
-              :rem 15
-              :font-rem 15}
-      "light" {:palette {:ui0 "#DDDD00"
-                         :ui1 "#000000"
-                         :brand1 "#FFAA00"}
-               :rem 15
-               :font-rem 15}}
-     :default-theme "light"})
 
 #_(defnc Tile
     [props]
@@ -58,45 +42,12 @@
                                :backgroundColor "#FFFFFF"}}
             (n/Text (pr-str item)))))))
 
-#_(defnc App
-    []
-    (let [s (useStyle)]
-      (n/View {:style #js {:backgroundColor "#EEAABB"
-                           :width "100%"
-                           :height "100%"
-                           :top 0
-                           :left 0
-                           :bottom 0
-                           :right 0
-                           :position "absolute"}}
-        (n/Text {:style (s [:pt3])}
-          "oi oi oi")
-        (n/Text {:style (s [:pt3])}
-          "bobobo")
-        (n/Text {:style (s [:bg-ui0])}
-          "Some text")
-        ($ Grid {:items
-                 [{:id 1
-                   :text "This"}
-                  {:id 2
-                   :text "That"}
-                  {:id 3
-                   :text "The other"}
-                  {:id 4
-                   :text "basdfas"}
-                  {:id 5
-                   :text "Asdf"}]})
-        (n/TouchableOpacity {:style #js {:backgroundColor "#FFAAFF"}}
-          (n/ActivityIndicator {:size  "large"
-                                :color "red"})))))
-
-(defnc App3
-  []
-  (let [st (s [:bg-brand1 :w100 :h100 :absolute])]
-    (n/View
-      {:style st})))
+(defnc App
+  [props]
+  (n/View {:style (s [:jcsa :bg-ui0 :b-brand1 :w100 :h100])}))
 
 (defn start
+
   "Entry point for ui, called every hot reload"
   {:dev/after-load true}
   []

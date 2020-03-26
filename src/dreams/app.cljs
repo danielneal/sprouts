@@ -2,8 +2,8 @@
   (:require [sprouts.async-storage :as async-storage]
             [sprouts.native :as n]
             [sprouts.revealer :as r :refer [Revealer]]
+            [sprouts.style6 :as style6 :refer [s]]
             [dreams.ui :as ui]
-            [sprouts.style4 :refer [s]]
             [dreams.questions :as q]
             [cljs-bean.core :refer [->clj]]
             [helix.core :as helix :refer [$$ $ <> defnc]]
@@ -11,7 +11,7 @@
             ["react-native" :as rn]
             ["react" :as react]
             ["@react-navigation/core" :refer [useNavigation useRoute]]
-            ["@react-navigation/native" :refer [NavigationNativeContainer]]
+            ["@react-navigation/native" :refer [NavigationContainer]]
             ["@react-navigation/stack" :refer [createStackNavigator]]
             ["react-native-safe-area-context" :refer [useSafeArea]]
             ["react-native-gesture-handler" :as gh]
@@ -20,6 +20,7 @@
             ["@expo/vector-icons" :refer [Entypo Ionicons]]
             ["react" :as react]
             ["react-native" :as rn]))
+
 
 (def diary-context
   (react/createContext))
@@ -49,7 +50,6 @@
         ($ ui/HelpButton {:onPress (fn []
                                      (.navigate navigation "dream-questions"))})))))
 
-(def Stack (createStackNavigator))
 
 (defnc AddDreamCta
   []
@@ -57,8 +57,8 @@
     (n/View {:style (s [:pa4 :aic])}
       ($ ui/TextButton
         {:onPress (fn []
-                    (.navigate navigation "dream-form" #js {:action :add-dream
-                                                            :title "Add Dream"}))
+                    (.navigate navigation "dream-form" {:action :add-dream
+                                                        :title "Add Dream"}))
          :text "Record Dream"}))))
 
 (defnc ModalScreen
@@ -74,7 +74,7 @@
         title)
       (<> children)
       ($ ui/TopRightCloseButtonLight)
-      (HelpButtonOverlay))))
+      ($ HelpButtonOverlay))))
 
 (defnc DreamHeader
   []
@@ -183,6 +183,7 @@
 
 (defnc EmptyState
   []
+  (println (s [:ui1 :f4 :tc]))
   (n/View {:style (s [:jcc :aic])}
     (n/View {:style (s [:pb2 :aic :jcc])}
       ($ Ionicons {:name "ios-cloudy-night"
@@ -238,7 +239,7 @@
                      [dream]
                      (fn []
                        (.navigate navigation "dream-form" {:dream dream
-                                                           :action :edit-dream
+                                                           :action "edit-dream"
                                                            :title "Edit Dream"})
                        (.close (.-current swipeable))))
         analyse-dream (hooks/use-callback
@@ -311,10 +312,12 @@
           ($ DreamQuestion {:key (:question question)
                             & question}))))))
 
+(def Stack (createStackNavigator))
+
 (defnc App
   []
   (let [ref (react/useRef)]
-    ($ NavigationNativeContainer
+    ($ NavigationContainer
       (helix/provider {:context diary-context
                        :value (useDiary)}
         ($ Stack.Navigator {:initialRouteName "diary"

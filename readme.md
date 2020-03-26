@@ -10,15 +10,16 @@
 8. focusing map to the body
 9. amino acid profile tracker for vegans
 10. language learning app
-11. ferment tracker - track
+11. ferment tracker - track what you have fermenting
 12. supermarket sweep - put in the aisles in your supermarket and your shopping list and get the pick order
-13. Farmer See - figure out your nutritional needs by leveraging your food preferences
+13. Farmer C - figure out your nutritional needs by leveraging your food preferences
 14. Tuber - ride sharing app
 15. Betting app for positivity
 16. Allchestra - play music across devices
-17. Half life - repeatable items that decay over time for e.g. cleaning, items in fridges
+17. Half life - repeatable to-do items that decay over time for e.g. cleaning, items in fridges
 18. Talkback - random comebacks
 19. Capsule - formula based wardrobes and food ideas
+20. Taperer - calculate drug tapers
 
 # Instructions
 

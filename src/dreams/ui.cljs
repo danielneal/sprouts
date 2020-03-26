@@ -1,5 +1,5 @@
 (ns dreams.ui
-  (:require [sprouts.style4 :as style4 :refer [s]]
+  (:require [sprouts.style6 :as style6 :refer [s]]
             [sprouts.revealer :as r]
             [sprouts.native :as n]
             [helix.core :as hx :refer [$ defnc]]
@@ -11,13 +11,13 @@
             ["react" :as react]
             ["@expo/vector-icons" :refer [Entypo]]))
 
-(style4/init!
-  {:themes {"dark" {:palette {:ui0 "#333344"
-                              :ui1 "#DDDDCC"
-                              :brand0 "#222244"
-                              :brand1 "#202033"}
-                    :rem 15}}
-   :default-theme "dark"})
+(style6/set-opts!
+  {:palette {:ui0 "#333344"
+             :ui1 "#DDDDCC"
+             :brand0 "#222244"
+             :brand1 "#202033"}
+   :rem 15
+   :font-rem 18})
 
 (defnc HelpButton
   [props]
@@ -83,9 +83,9 @@
        :style (s [:br1 :ui1 :bg-ui1 :pa2 :f4 :w100])
        :ref ref
        :onFocus (fn [e]
-                  (reveal ref)
                   (when onFocus
-                    (onFocus e)))
+                    (onFocus e))
+                  (reveal ref))
        & (dissoc props :onFocus)})))
 
 (defnc MultilineTextInput
@@ -102,9 +102,9 @@
        :style (s [:br1 :h10 :ui1 :bg-brand1 :pa2 :f4 :w100])
        :ref ref
        :onFocus (fn [e]
-                  (reveal ref)
                   (when onFocus
-                    (onFocus e)))
+                    (onFocus e))
+                  (reveal ref))
        & (dissoc props :onFocus)})))
 
 (defnc SelectorButtons

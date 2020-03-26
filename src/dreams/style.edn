@@ -1,0 +1,6 @@
+{:themes {"dark" {:palette {:ui0 "#333344"
+                            :ui1 "#DDDDCC"
+                            :brand0 "#222244"
+                            :brand1 "#202033"}
+                  :rem 15}}
+ :default-theme "dark"}
